@@ -1,0 +1,9 @@
+---
+    - hosts: vm1
+      become: true
+      tasks:
+          - name: install apache
+            apt: name=apache2 state=latest
+
+          - name: start Aapache.
+            service: name=apache2 state=started enabled=yes
