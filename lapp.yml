@@ -1,0 +1,25 @@
+---
+    - hosts: vagrant_vm1
+      become: yes
+      vars:
+          base_locale: LANG=ja_JP.UTF-8
+      tasks:
+          - name: 基本パッケージをインストール
+            apt: name={{item}} state=present update_cache=no
+            with_items:
+                - git
+                - vim
+                - ntp
+                - language-pack-ja
+
+          - name: ロケール設定
+            command: update-locale {{base_locale}}
+
+          - name: タイムゾーンシンボリックリンク作成
+            file: src=/usr/share/zoneinfo/posix/Asia/Tokyo dest=/etc/localtime group=vagrant owner=vagrant state=link force=yes
+
+          - name: タイムゾーン設定
+            command: dpkg-reconfigure -f noninteractive tzdata
+
+          - name: ntpdを起動、自動起動の有効化
+            service: name=ntp state=started enabled=yes
