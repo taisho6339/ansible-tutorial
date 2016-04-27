@@ -1,5 +1,5 @@
 ---
-    - hosts: vm1
+    - hosts: vagrant_vm1
       become: true
       tasks:
           - name: 現在日を取得
