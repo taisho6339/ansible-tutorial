@@ -5,7 +5,7 @@
           base_locale: LANG=ja_JP.UTF-8
       tasks:
           - name: 基本パッケージをインストール
-            apt: name={{item}} state=present update_cache=no
+            apt: name={{item}} state=present update_cache=yes
             with_items:
                 - git
                 - vim
@@ -23,3 +23,91 @@
 
           - name: ntpdを起動、自動起動の有効化
             service: name=ntp state=started enabled=yes
+
+          - name: Apacheをインストール
+            apt: name=apache2 state=present
+            tags:
+                - apache
+
+          - name: apache2.confテンプレートを転送
+            template:
+                src=files/apache/apache2.conf.j2
+                dest=/etc/apache2/apache2.conf
+                owner=root
+                group=root
+                mode=0644
+            tags:
+                - apache
+            notify:
+                - Apacheを再起動
+
+          - name: vhosts.confテンプレートを転送
+            template:
+                src=files/apache/vhosts.conf.j2
+                dest=/etc/apache2/sites-available/vhosts.conf
+                owner=root
+                group=root
+                mode=0644
+            tags:
+                - apache
+            notify:
+                - Apacheを再起動
+
+          - name: Apacheを起動、自動起動を有効化
+            service: name=apache2 state=started enabled=yes
+            tags:
+                - apache
+
+          - name: レポジトリを追加するためにsoftware-properties-commonをインストール
+            apt: name=software-properties-common state=present update_cache=yes
+            tags:
+                - php
+
+          - name: ppaレポジトリを追加
+            apt_repository: repo='ppa:ondrej/php'
+            tags:
+                - php
+
+          - name: PHP7.0をインストール
+            apt: name={{item}} state=present update_cache=yes
+            with_items:
+                - php7.0
+                - php7.0-cli
+                - php7.0-fpm
+                - php7.0-pdo
+                - php7.0-pgsql
+                - php7.0-mbstring
+                - php7.0-mcrypt
+                - php7.0-dev
+                - php7.0-common
+                - php-pear
+                - php7.0-opcache
+                - php7.0-json
+                - php-memcached
+                - php7.0-zip
+            tags:
+                - php
+
+          - name: カスタムphp.iniをコマンドライン用のフォルダに作成
+            copy: src=files/php/zzmyphp.ini dest=/etc/php/7.0/cli/conf.d/zzmyphp.ini
+            notify:
+                - Apacheを再起動
+            tags:
+                - php
+
+          - name: カスタムphp.iniをApache2用のフォルダに作成
+            copy: src=files/php/zzmyphp.ini dest=/etc/php7/apache2/zzmyphp.ini
+            ignore_errors: True
+            notify:
+                - Apacheを再起動
+            tags:
+                - php
+                - apache
+
+          - name: composer.pharインストール
+            shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer creates=/usr/bin/composer
+            tags:
+                - php
+      handlers:
+          - name: Apacheを再起動
+            service: name=apache2 state=restarted
