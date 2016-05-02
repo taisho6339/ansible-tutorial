@@ -20,6 +20,6 @@ deploy_laravel_app_key=seITT4CLYjZvTiwlR2aobMKqgvYn9snP
 db_connection=pgsql
 db_host="null"
 db_database=app
-db_testdatabase=app_test
+db_test_database=app_test
 db_username=vagrant
 db_password=pass
