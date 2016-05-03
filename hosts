@@ -1,5 +1,5 @@
 [vagrant]
-vagrant_vm1 ansible_ssh_host=192.168.34.23
+vm1 ansible_ssh_host=192.168.34.23
 
 [vagrant:vars]
 ansible_ssh_user=vagrant
