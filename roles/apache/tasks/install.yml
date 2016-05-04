@@ -1,0 +1,5 @@
+---
+    - name: Apacheをインストール
+      apt: name=apache2 state=present
+      tags:
+          - apache

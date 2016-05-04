@@ -1,0 +1,39 @@
+---
+    - name: apache2.confテンプレートを転送
+      template:
+          src=apache2.conf.j2
+          dest=/etc/apache2/apache2.conf
+          owner=root
+          group=root
+          mode=0644
+      tags:
+          - apache
+      notify:
+          - Apacheを再起動
+
+    - name: デフォルトのvhostファイルを無効化
+      shell: a2dissite 000-default.conf
+      tags:
+          - apache
+
+    - name: vhosts.confテンプレートを転送
+      template:
+          src=vhosts.conf.j2
+          dest=/etc/apache2/sites-available/vhosts.conf
+          owner=root
+          group=root
+          mode=0644
+      tags:
+          - apache
+
+    - name: vhosts.confを有効化
+      shell: a2ensite vhosts.conf
+      tags:
+          - apache
+      notify:
+          - Apacheを再起動
+
+    - name: Apacheを起動、自動起動を有効化
+      service: name=apache2 state=started enabled=yes
+      tags:
+          - apache

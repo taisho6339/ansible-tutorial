@@ -1,0 +1,46 @@
+---
+    - name: PostgreSQLをインストール
+      apt: name=postgresql-9.3 state=present
+      tags:
+          - postgresql
+
+    - name: PostgreSQLデータベースを初期化
+      command: /usr/bin/pg_createcluster
+      args:
+          creates: /etc/postgresql/9.3/main/postgresql.conf
+      tags:
+          - postgresql
+
+    - name: pg_hba.confテンプレートを転送
+      template: src=pg_hba.conf.j2 dest=/etc/postgresql/9.3/main/pg_hba.conf
+      notify: PostgreSQLを再起動
+      tags:
+          - postgresql
+
+    - name: PostgreSQLを起動、自動起動を有効化
+      service: name=postgresql state=started enabled=yes
+      tags:
+          - postgresql
+
+    - name: ユーザ作成に必要なPythonモジュールをインストール
+      apt: name=python-psycopg2 state=present
+      tags:
+          - postgresql
+
+    - name: PostgreSQLユーザを作成
+      postgresql_user:
+          name={{db_username}}
+          password={{db_password}}
+          role_attr_flags=CREATEDB,NOSUPERUSER
+      become_user: postgres
+      tags:
+              - postgresql
+
+    - name: アプリケーションデータベースを作成
+      postgresql_db: name={{item}} owner={{db_username}} encoding=UTF-8 template=template0
+      become_user: postgres
+      with_items:
+          - "{{db_database}}"
+          - "{{db_test_database}}"
+      tags:
+          - postgresql

@@ -1,0 +1,20 @@
+---
+     - name: 基本パッケージをインストール
+       apt: name={{item}} state=present update_cache=yes
+       with_items:
+           - git
+           - vim
+           - ntp
+           - language-pack-ja
+
+     - name: ロケール設定
+       command: update-locale {{base_locale}}
+
+     - name: タイムゾーンシンボリックリンク作成
+       file: src=/usr/share/zoneinfo/posix/Asia/Tokyo dest=/etc/localtime group=vagrant owner=vagrant state=link force=yes
+
+     - name: タイムゾーン設定
+       command: dpkg-reconfigure -f noninteractive tzdata
+
+     - name: ntpdを起動、自動起動の有効化
+       service: name=ntp state=started enabled=yes

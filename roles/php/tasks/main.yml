@@ -1,0 +1,61 @@
+---
+     - name: レポジトリを追加するためにsoftware-properties-commonをインストール
+       apt: name=software-properties-common state=present update_cache=yes
+       tags:
+           - php
+
+     - name: ppaレポジトリを追加
+       apt_repository: repo='ppa:ondrej/php'
+       tags:
+           - php
+
+     - name: PHP7.0をインストール
+       apt: name={{item}} state=present update_cache=yes
+       with_items:
+           - php7.0
+           - php7.0-cli
+           - php7.0-fpm
+           - php7.0-pdo
+           - php7.0-pgsql
+           - php7.0-mbstring
+           - php7.0-mcrypt
+           - php7.0-dev
+           - php7.0-common
+           - php-pear
+           - php7.0-opcache
+           - php7.0-json
+           - php-memcached
+           - php7.0-zip
+       tags:
+           - php
+
+     - name: カスタムphp.iniをコマンドライン用のフォルダに作成
+       copy: src=zzmyphp.ini dest=/etc/php/7.0/cli/conf.d/zzmyphp.ini
+       notify:
+           - Apacheを再起動
+       tags:
+           - php
+
+     - name: Apache2用のカスタムphp.iniを配置するためのフォルダを作成
+       file:
+           path=/etc/php/7.0/apache2
+           state=directory
+           owner=vagrant
+           group=vagrant
+           recurse=yes
+       tags:
+           - php
+
+     - name: カスタムphp.iniをApache2用のフォルダに作成
+       copy: src=zzmyphp.ini dest=/etc/php/7.0/apache2/zzmyphp.ini
+       ignore_errors: True
+       notify:
+           - Apacheを再起動
+       tags:
+           - php
+           - apache
+
+     - name: composer.pharインストール
+       shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer creates=/usr/bin/composer
+       tags:
+           - php
