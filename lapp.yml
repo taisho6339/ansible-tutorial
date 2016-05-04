@@ -41,6 +41,11 @@
             notify:
                 - Apacheを再起動
 
+          - name: デフォルトのvhostファイルを無効化
+            shell: a2dissite 000-default.conf
+            tags:
+                - apache
+
           - name: vhosts.confテンプレートを転送
             template:
                 src=files/apache/vhosts.conf.j2
@@ -48,6 +53,11 @@
                 owner=root
                 group=root
                 mode=0644
+            tags:
+                - apache
+
+          - name: vhosts.confを有効化
+            shell: a2ensite vhosts.conf
             tags:
                 - apache
             notify:

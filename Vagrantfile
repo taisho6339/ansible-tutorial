@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
 
     config.vm.box = "ubuntu-14.04"
     config.vm.hostname = "sample-app-deploy.dev"
-    config.vm.network :public_network, ip: "192.168.34.23"
+    config.vm.network :private_network, ip: "192.168.34.23"
 
     config.vm.synced_folder ".", "/vagrant", mount_options: ["dmode=777", "fmode=666"]
 end
